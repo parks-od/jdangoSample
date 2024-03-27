@@ -40,8 +40,8 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     # third apps
     "django_bootstrap5",
+    # local apps
     "app",
-    "catube",
 ]
 
 MIDDLEWARE = [
