@@ -1,0 +1,8 @@
+{% extends 'app/base.html' %}
+
+{% block contents %}
+    <h1>Post Detail : {{ post.title }}</h1>
+    {{ post.content }}
+    <hr>
+    <a href="/app/">목록으로</a>
+{% endblock %}

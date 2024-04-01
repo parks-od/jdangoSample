@@ -1,0 +1,12 @@
+{% extends 'app/base.html' %}
+
+{% block contents %}
+        {%  for post in post_list %}
+        <div>
+            <a href="/app/{{ post.id }}">
+                {{ post.id }}. {{ post.title }}
+            </a>
+        </div>
+    {% endfor  %}
+    <a href="/app/new/">생성</a>
+{% endblock %}
