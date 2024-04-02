@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     # local apps
     "app",
 ]
+
 APSCHEDULER_DATETIME_FORMAT = "N j, Y, f:s a"  # Default
 
 SCHEDULER_DEFAULT = True

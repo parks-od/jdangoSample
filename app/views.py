@@ -1,4 +1,3 @@
-import sched
 from decimal import Decimal
 
 from django.http import HttpRequest, HttpResponse, JsonResponse
@@ -11,6 +10,52 @@ from app.models import Asset
 
 # Create your views here.
 def index(request: HttpRequest) -> HttpResponse:
+    qs = Asset.objects.all()
+    return render(
+        request,
+        "app/index.html",
+        {
+            "asset_list": qs,
+        },
+    )
+
+def calc_asset(request):
+    input_code = request.GET.get("code")
+    input_price = Decimal(request.GET.get("price"))
+
+    qs = Asset.objects.filter(code=input_code).first()
+
+    clac = qs.price
+
+    # 수익률 연산
+    per_cen = round((1 - clac / input_price), 4) * 100
+    msg = ''
+
+    if round(per_cen, 1) > 1:
+        msg = f'현재 가격 {clac.per_cen} 에서 {round(clac.per_cen, 2)}% 하락할 경우 해당 금액 입니다.'
+    elif clac == input_price:
+        msg = "현재 가격과 일치 합니다"
+    else:
+        msg = f"현재 가격 {clac}에서 {round(abs(per_cen), 2)}% 상승할 경우 해당 금액 입니다."
+    data = {
+        "msg": msg,
+    }
+    return JsonResponse(data)
+
+
+def get_stocks(request):
+    input_code = request.GET.get("parentCode")
+
+    qs = list(Asset.objects.filter(parentCode=input_code).values("title", "code"))
+
+    data = {
+        "stocks": qs,
+    }
+
+    return JsonResponse(data)
+
+
+def import_asset():
     # 기본 세팅 일별로 15:35분 스케줄링작업
     stock_name = []
     stock_code = []
@@ -45,46 +90,5 @@ def index(request: HttpRequest) -> HttpResponse:
 
     for index, row in df.iterrows():
         Asset(parentCode='kospi', title=row['종목명'], price=row['종가'], code=row['종목코드'], today_range=row['등락률']).save()
-    qs = Asset.objects.all()
-    return render(
-        request,
-        "app/index.html",
-        {
-            "asset_list": qs,
-        },
-    )
 
-
-def import_asset():
-    print('hi')
-
-
-def calc_asset(request):
-    input_code = request.GET.get("code")
-    input_price = Decimal(request.GET.get("price"))
-
-    qs = Asset.objects.filter(code=input_code).first()
-
-    clac = qs.price
-
-    # 수익률 연산
-    per_cen = round((1 - clac / input_price), 4) * 100
-
-    if round(per_cen, 1) > 1:
-        print("현재 가격(%.2f)에서 %.2f %% 하락할 경우 해당 금액 입니다." % clac.per_cen)
-    elif clac == input_price:
-        print("현재 가격과 일치 합니다")
-    else:
-        print("현재 가격(%.2f)에서 %.2f %% 상승할 경우 해당 금액 입니다." % (clac, abs(per_cen)))
-    return JsonResponse(clac)
-
-
-def get_stocks(request):
-    input_code = request.GET.get("parentCode")
-
-    qs = Asset.objects.filter(parentCode=input_code)
-
-    for stock in qs:
-        print(stock)
-        
-    return JsonResponse(qs)
+    print(f'insert {len(df)} data was successfully saved!')
