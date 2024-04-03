@@ -6,6 +6,7 @@ from pykrx import stock
 import pandas as pd
 from datetime import datetime
 from app.models import Asset
+import json
 
 
 # Create your views here.
@@ -19,9 +20,12 @@ def index(request: HttpRequest) -> HttpResponse:
         },
     )
 
+
 def calc_asset(request):
-    input_code = request.GET.get("code")
-    input_price = Decimal(request.GET.get("price"))
+    post_data = json.loads(request.body.decode("utf-8"))
+    input_code = post_data.get("code")
+
+    input_price = Decimal(post_data.get("price"))
 
     qs = Asset.objects.filter(code=input_code).first()
 
@@ -29,10 +33,11 @@ def calc_asset(request):
 
     # 수익률 연산
     per_cen = round((1 - clac / input_price), 4) * 100
+    print(per_cen)
     msg = ''
 
     if round(per_cen, 1) > 1:
-        msg = f'현재 가격 {clac.per_cen} 에서 {round(clac.per_cen, 2)}% 하락할 경우 해당 금액 입니다.'
+        msg = f'현재 가격 {clac} 에서 {round(per_cen, 2)}% 하락할 경우 해당 금액 입니다.'
     elif clac == input_price:
         msg = "현재 가격과 일치 합니다"
     else:
@@ -44,7 +49,8 @@ def calc_asset(request):
 
 
 def get_stocks(request):
-    input_code = request.GET.get("parentCode")
+    post_data = json.loads(request.body.decode("utf-8"))
+    input_code = post_data.get("parentCode")
 
     qs = list(Asset.objects.filter(parentCode=input_code).values("title", "code"))
 

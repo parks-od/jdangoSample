@@ -1,12 +1,72 @@
 {% extends 'app/base.html' %}
 
 {% block contents %}
-        {%  for post in post_list %}
-        <div>
-            <a href="/app/{{ post.id }}">
-                {{ post.id }}. {{ post.title }}
-            </a>
+<div class="row">
+        <div class="col-md-6">
+            <label for="parentCode" class="form-label">메뉴</label>
+            <select class="form-select" id="parentCode" onchange="fn_chCode()">
+                <option value="kospi">Kospi</option>
+                <option value="kosDaq">KosDaq</option>
+            </select>
         </div>
-    {% endfor  %}
-    <a href="/app/new/">생성</a>
+        <div class="col-md-6">
+            <label for="code" class="form-label">종목 상세</label>
+            <select class="form-select" id="code">
+                {% for stock in asset_list %}
+                    <option value="{{stock.code}}">{{stock.title}}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+    <div class="row mt-3">
+        <div class="col-md-6">
+            <label for="price" class="form-label">내 자산 가격</label>
+            <input type="text" class="form-control" id="price">
+        </div>
+        <div class="col-md-6">
+            <button type="button" class="btn btn-primary" onclick="calculate()">계산</button>
+        </div>
+    </div>
+    <div class="row mt-3">
+        <div class="col-md-12">
+            <p id="result" class="fw-bold"></p>
+        </div>
+    </div>
+    <script>
+        function calculate() {
+            const requestHeaders = new Headers();
+            requestHeaders.set('X-CSRFToken', '{{csrf_token}}');
+            fetch("/calc_asset/", {
+                  method: "POST",
+                    headers: requestHeaders,
+                  body: JSON.stringify({
+                    price: document.getElementById("price").value,
+                    code: document.getElementById("code").value,
+                  }),
+                })
+                .then((response) => response.json())
+                .then((result) => document.getElementById("result").innerText =  result.msg);
+        }
+
+        function fn_chCode() {
+            let code = document.getElementById("code");
+            const requestHeaders = new Headers();
+            requestHeaders.set('X-CSRFToken', '{{csrf_token}}');
+            fetch("/get_stocks/", {
+                  method: "POST",
+                    headers: requestHeaders,
+                  body: JSON.stringify({
+                    parentCode: document.getElementById("parentCode").value,
+                  }),
+                })
+                .then((response) => response.json())
+                .then((result) => {
+                    let innerHtml = '';
+                    for (let i in result.stocks){
+                        innerHtml += "<option value='"+result.stocks[i].code+"'>"+result.stocks[i].title+"</option>";
+                     }
+                    code.innerHTML = innerHtml;
+                });
+        }
+    </script>
 {% endblock %}

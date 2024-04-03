@@ -1,20 +1,14 @@
 {%  load django_bootstrap5%}
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
     <meta charset="UTF-8">
     <title>장고 입문</title>
 </head>
 <body>
-    <div class="container">
-    <h1>장고 입문</h1>
-    {% if user.is_authenticated %}
-        <p> logged by {{ user }}</p>
-        <a href="/accounts/logout/">Logout</a>
-    {% else %}
-        <a href="/accounts/login/">Login</a>
-    {% endif %}
+    <div class="container mt-5">
+    <h1 class="mb-4">내 자산 상승/하락 % 계산기</h1>
 
     {% bootstrap_css %}
     {% bootstrap_javascript %}
@@ -23,7 +17,7 @@
     {% endblock %}
 
     <hr>
-    &copy; 2022. 파이썬 사랑방.
+    &copy; 2024. parks-od.
     </div>
 </body>
 </html>
